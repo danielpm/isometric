@@ -7,16 +7,16 @@
 
     var Isometric = holder.Isometric = {};
 
-    Isometric.Drawable = function () {
-        this._image = null;
-        this._imageSize = {xp: 32, yp: 0, h: 32, w: 32};
-        this._position = {x: 0, y: 0, z: 0};
+    Isometric.Drawable = function (image, imageRect, position) {
+        this._image = image || null;
+        this._imageRect = iamgeRect || {xp: 32, yp: 0, h: 32, w: 32};
+        this._position = position || {x: 0, y: 0, z: 0};
 
         this.getImage = function() {
             return this._image;
         };
-        this.getImageSize = function () {
-            return this._imageSize;
+        this.getImageRect = function () {
+            return this._imageRect;
         }
         this.getPosition = function() {
             return this._position;
@@ -69,7 +69,7 @@
 
         for ( var i=0, len=objects.length; i<len; i++ ) {
             var o = objects[i];
-            var imgSize = o.getImageSize();
+            var imgSize = o.getImageRect();
             var position = o.getPosition();
 
             var dx = incx*position.x;
@@ -88,7 +88,7 @@
 
             if ( lastOrderValue != undefined && thisOrderValue > lastOrderValue ) {
                 Isometric.order(objects);
-                throw 'Objects are not ordered to draw! We ordered they  for you ;D'
+                throw 'Objects are not ordered to draw! We ordered they for you ;D'
             }
 
             lastOrderValue = thisOrderValue;

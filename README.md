@@ -39,13 +39,13 @@ To draw anything create a list of drawable, there is a simple object to do this 
 
     window.Isometric.Drawable = function () {
         this._image = null;
-        this._imageSize = {xp: 32, yp: 0, h: 32, w: 32};
+        this._imageRect = {xp: 32, yp: 0, h: 32, w: 32};
         this._position = {x: 0, y: 0, z: 0};
 
         this.getImage = function() {
             return this._image;
         };
-        this.getImageSize = function () {
+        this.getImageRect = function () {
             return this._imageSize;
         }
         this.getPosition = function() {
