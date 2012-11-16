@@ -35,7 +35,7 @@
                 var context = canvas.getContext('2d');
 
                 var engine = window.Isometric;
-                var camera = new window.Isometric.Camera();
+                var camera = undefined; //new window.Isometric.Camera();
                 var objects = [];
 
                 var spriteSize = {x:32, y:16};
@@ -49,6 +49,11 @@
                         }
                         o._position = {x: i, y: j};
                         objects.push(o)
+
+                        if ( i==0 && j==5 ) {
+                            o._imageRect = {xp: 0, yp: 0, h: 32, w: 32};
+                            camera = o;
+                        }
                     }
                 }
 
@@ -61,10 +66,28 @@
                 //give order to the objects to draw!
                 //objects = window.Isometric.order(objects);
 
+                var frames = 0;
+                var millis = 3 * 1000;
+                var end = new Date().getTime() + millis;
+
+                console.log('start');
+                console.log(new Date());
+
                 (function run () {
-                    animationFrame(run)
-                    //setTimeout(run,33);
+                    if ( new Date().getTime() < end) {
+                        animationFrame(run)
+                        //setTimeout(run,0);
+                        frames++;
+                    } else {
+                        var fps = frames/(millis/1000);
+                        console.log(new Date())
+                        console.log(frames)
+                        console.log(millis)
+                        console.log(fps);
+                    }
+                    
                     stats.begin();
+                    objects = window.Isometric.order(objects);
                     engine.draw(objects, camera, canvas, context, spriteSize);
                     stats.end();
                 })();

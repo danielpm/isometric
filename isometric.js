@@ -9,7 +9,7 @@
 
     Isometric.Drawable = function (image, imageRect, position) {
         this._image = image || null;
-        this._imageRect = iamgeRect || {xp: 32, yp: 0, h: 32, w: 32};
+        this._imageRect = imageRect || {xp: 32, yp: 0, h: 32, w: 32};
         this._position = position || {x: 0, y: 0, z: 0};
 
         this.getImage = function() {
@@ -25,7 +25,8 @@
 
     Isometric.Camera = function () {
         this.getPosition = function () {
-            return {x: 320, y: 240, z: 0};
+            //return {x: 320, y: 240, z: 0};
+            return {x: 5, y: 0, z: 0};
         }
     }
 
@@ -50,8 +51,8 @@
         var spriteX = spriteSize.x;
         var spriteY = spriteSize.y; //normally half of the 'x'
 
-        camera.hx = canvas.width / 2;
-        camera.hy = canvas.height / 2;
+        var canvasHalfWidth = canvas.width / 2;
+        var canvasHalfHeight = canvas.height / 2;
 
         var incx = spriteX/2;
         var incy = spriteY/2;
@@ -64,6 +65,7 @@
             throw 'Cant do anything without a canvas!'
 
         var lastOrderValue = undefined;
+        var cameraPosition = camera.getPosition();
 
         context.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -72,17 +74,23 @@
             var imgSize = o.getImageRect();
             var position = o.getPosition();
 
+            //put everything in their position
             var dx = incx*position.x;
             var dy = - incy*position.y;
-
             dx += position.y*incx;
             dy += position.x*incy
-
-            dx += camera.hx;
-            dy += camera.hy;
-
+            
+            //put the center in the center
+            dx += canvasHalfWidth;
+            dy += canvasHalfHeight;
             dx += - incx;
             dy += - incy - incy;
+
+            //make a pan to the camera position
+            dx += -incx*cameraPosition.x;
+            dy += incy*cameraPosition.y;
+            dx += -cameraPosition.y*incx;
+            dy += -cameraPosition.x*incy
 
             var thisOrderValue = Isometric.orderValue(o);
 
