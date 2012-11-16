@@ -1,0 +1,77 @@
+<html>
+<head>
+    <title></title>
+    <script src="jquery-1.8.2.js"></script>
+    <script src="stats.js"></script>
+    <script src="isometric.js"></script>
+</head>
+<body style="background-color: #aaa">
+    <br>
+    <br>
+    <br>
+    <canvas id="canvas" width="640px" height="480px" style="background-color: #999"></canvas>
+    <script>
+
+        $().ready(function () {
+
+            var imageObj = new Image();
+            imageObj.onload = function() {
+                $().ready(function () {
+                    afterLoad();
+                });
+            };
+            imageObj.src = 'sprite.png';
+
+            function afterLoad() {
+
+                var stats = new Stats();
+                // Align top-left
+                stats.domElement.style.position = 'absolute';
+                stats.domElement.style.left = '300px';
+                stats.domElement.style.top = '0px';
+                document.body.appendChild( stats.domElement );
+
+                var canvas = document.getElementById('canvas');
+                var context = canvas.getContext('2d');
+
+                var engine = window.Isometric;
+                var camera = new window.Isometric.Camera();
+                var objects = [];
+
+                var spriteSize = {x:32, y:16};
+
+                //create some sprites to draw
+                for ( var i=-10; i<=10; i++) {
+                    for ( var j=-10; j<=10; j++) {
+                        var o = new window.Isometric.Drawable();
+                        o.getImage = function() {
+                            return imageObj;
+                        }
+                        o._position = {x: i, y: j};
+                        objects.push(o)
+                    }
+                }
+
+                 var animationFrame = window.requestAnimationFrame //Hope
+                    || window.mozRequestAnimationFrame // Firefox
+                    || window.msRequestAnimationFrame // IE 10 PP2+
+                    || window.webkitRequestAnimationFrame; // Chrome/Webkit
+
+
+                //give order to the objects to draw!
+                //objects = window.Isometric.order(objects);
+
+
+                (function run () {
+                    animationFrame(run)
+                    //setTimeout(run,33);
+                    stats.begin();
+                    engine.draw(objects, camera, canvas, context, spriteSize);
+                    stats.end();
+                })();
+
+            }
+        });
+    </script>
+</body>
+</html>
