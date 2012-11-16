@@ -1,37 +1,56 @@
-var http = require("http"),
+/*
+ * From git://gist.github.com/906395.git
+ * on terminal:
+       npm install mime
+       node server.js
+ */
+
+var libpath = require('path'),
+    http = require("http"),
+    fs = require('fs'),
     url = require("url"),
-    path = require("path"),
-    fs = require("fs")
-    port = process.argv[2] || 8888;
+    mime = require('mime');
 
-http.createServer(function(request, response) {
+var path = ".";
+var port = 8888;
 
-  var uri = url.parse(request.url).pathname
-    , filename = path.join(process.cwd(), uri);
-  
-  path.exists(filename, function(exists) {
-    if(!exists) {
-      response.writeHead(404, {"Content-Type": "text/plain"});
-      response.write("404 Not Found\n");
-      response.end();
-      return;
-    }
+http.createServer(function (request, response) {
 
-    if (fs.statSync(filename).isDirectory()) filename += '/index.html';
+    var uri = url.parse(request.url).pathname;
+    var filename = libpath.join(path, uri);
 
-    fs.readFile(filename, "binary", function(err, file) {
-      if(err) {        
-        response.writeHead(500, {"Content-Type": "text/plain"});
-        response.write(err + "\n");
-        response.end();
-        return;
-      }
+    libpath.exists(filename, function (exists) {
+        if (!exists) {
+            response.writeHead(404, {
+                "Content-Type": "text/plain"
+            });
+            response.write("404 Not Found\n");
+            response.end();
+            return;
+        }
 
-      response.writeHead(200);
-      response.write(file, "binary");
-      response.end();
+        if (fs.statSync(filename).isDirectory()) {
+            filename += '/index.html';
+        }
+
+        fs.readFile(filename, "binary", function (err, file) {
+            if (err) {
+                response.writeHead(500, {
+                    "Content-Type": "text/plain"
+                });
+                response.write(err + "\n");
+                response.end();
+                return;
+            }
+
+            var type = mime.lookup(filename);
+            response.writeHead(200, {
+                "Content-Type": type
+            });
+            response.write(file, "binary");
+            response.end();
+        });
     });
-  });
-}).listen(parseInt(port, 10));
+}).listen(port);
 
-console.log("Static file server running at\n  => http://localhost:" + port + "/\nCTRL + C to shutdown");
+console.log('server running on ' + port)
