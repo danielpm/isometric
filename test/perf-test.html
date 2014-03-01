@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Performance Page</title>
+</head>
+<body>
+  <canvas id='game-container'></canvas>
+  <div id='results' style='position: absolute; left: 0px; top: 60px'></div>
+  <script src='../vendor/Stats.js'></script>
+  <script src='../lib/isometric.js'></script>
+  <script>
+
+    // load the Stats to validate performance
+    var stats = new Stats();
+    stats.setMode(1); // 0: fps, 1: ms
+
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.left = '0px';
+    stats.domElement.style.top = '0px';
+
+    document.body.appendChild( stats.domElement );
+
+    // load the tileset
+    var tileset = new Image();
+    tileset.src = 'ground-test-half.png';
+
+    // create one sprite
+    var sprite = new thc.Sprite('sprite-ground',
+      tileset,
+      32, 16,   // size of this tile
+      32, 8,    // top left position of the this tile in the tileset
+      16, 8);   // center of this tile, if the tile is flat the values are half from the size of the tile
+
+    var block = new thc.Sprite('sprite-block',
+      tileset,
+      32, 24,   // size of this tile
+      0, 0,     // top left position of the this tile in the tileset
+      16, 8);   // center of this tile, if the tile is flat the values are half from the size of the tile
+
+    // find the canvas
+    var canvas = document.getElementById('game-container');
+
+    // create the isometric renderer
+    var isometric = new thc.Isometric(canvas,
+      32, 16,     // normal size of the tiles
+      600, 480);  // canvas size
+
+    // let the isometric know about our sprite
+    isometric.addSprite(sprite);
+    isometric.addSprite(block);
+
+    // create a camera to represent where is the center of the screen
+    var camera = {x: 0, y: 0};
+    isometric.setCamera(camera);
+
+    var counter = 0;
+    var step = 0;
+    var results = document.getElementById('results');
+
+    function appendResult(ms, qtd) {
+      var p = document.createElement('p');
+      p.textContent = ms + 'ms to render ' + qtd + ' elements';
+      results.appendChild(p);
+    }
+
+    setInterval(function () {
+
+      for (var i=0; i<10; i++) {
+        isometric.addObject({
+          x: (Math.random()*600-300)/8.0,
+          y: (Math.random()*480-240)/8.0,
+          sizeX: 32,
+          sizeY: 16,
+          sprite: Math.random()>0.5? 'sprite-ground' : 'sprite-block'});
+      }
+
+      isometric.orderObjects();
+
+      if (counter++ % 10 == 0) {
+        //console.log('number of objects ' + isometric.objects.length);
+      }
+
+      // start counting performance
+      stats.begin();
+
+      // draws everything
+      isometric.draw();
+
+      // end counting performance
+      var t = stats.end();
+
+      if (t > 4 && step == 0) {
+        console.log('number of objects at ms > 4 ' + isometric.objects.length);
+        appendResult(4, isometric.objects.length);
+        step++;
+      }
+      else if (t > 8 && step == 1) {
+        console.log('number of objects at ms > 8 ' + isometric.objects.length);
+        appendResult(8, isometric.objects.length);
+        step++;
+      }
+       else if (t > 12 && step == 2) {
+        console.log('number of objects at ms > 12 ' + isometric.objects.length);
+        appendResult(12, isometric.objects.length);
+        step++;
+      }
+       else if (t > 16 && step == 3) {
+        console.log('number of objects at ms > 16 ' + isometric.objects.length);
+        appendResult(16, isometric.objects.length);
+        step++;
+      }
+
+    }, 1000.0 / 60.0 );
+
+    window.onresize = function() {
+      var w = window.innerWidth;
+      var h = window.innerHeight;
+      isometric.resize(w, h);
+    }
+
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+    isometric.resize(w, h);
+    
+  </script>
+</body>
+</html>

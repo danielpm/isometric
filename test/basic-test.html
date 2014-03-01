@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Basic Page</title>
+</head>
+<body>
+  <canvas id='game-container'></canvas>
+  <script src='../vendor/Stats.js'></script>
+  <script src='../lib/isometric.js'></script>
+  <script>
+
+    // load the Stats to validate performance
+    var stats = new Stats();
+    stats.setMode(1); // 0: fps, 1: ms
+
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.left = '0px';
+    stats.domElement.style.top = '0px';
+
+    document.body.appendChild( stats.domElement );
+
+    // load the tileset
+    var tileset = new Image();
+    tileset.src = 'ground-test-half.png';
+
+    // create one sprite
+    var sprite = new thc.Sprite('sprite-ground',
+      tileset,
+      32, 16,   // size of this tile
+      32, 8,    // top left position of the this tile in the tileset
+      16, 8);   // center of this tile, if the tile is flat the values are half from the size of the tile
+
+    // find the canvas
+    var canvas = document.getElementById('game-container');
+
+    // create the isometric renderer
+    var isometric = new thc.Isometric(canvas,
+      32, 16,     // normal size of the tiles
+      600, 480);  // canvas size
+
+    // let the isometric know about our sprite
+    isometric.addSprite(sprite);
+
+    // create a camera to represent where is the center of the screen
+    var camera = {x: 0, y: 0};
+    isometric.setCamera(camera);
+
+    // create some objects to draw using our sprite
+    var obj1 = {x: 0, y: 0, sizeX: 32, sizeY: 16, sprite: 'sprite-ground'};
+    var obj2 = {x: 1, y: 0, sizeX: 32, sizeY: 16, sprite: 'sprite-ground'};
+    var obj3 = {x: 2, y: 0, sizeX: 32, sizeY: 16, sprite: 'sprite-ground'};
+    var obj4 = {x: 0, y: 1, sizeX: 32, sizeY: 16, sprite: 'sprite-ground'};
+
+    // add this objects to our isometric
+    isometric.addObject(obj1);
+    isometric.addObject(obj2);
+    isometric.addObject(obj3);
+    isometric.addObject(obj4);
+
+    setInterval( function () {
+
+        // start counting performance
+        stats.begin();
+
+        // draws everything
+        isometric.draw();
+
+        // end counting performance
+        stats.end();
+
+    }, 1000 / 60 );
+    
+  </script>
+</body>
+</html>

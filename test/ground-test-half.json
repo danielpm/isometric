@@ -1,0 +1,15 @@
+
+{
+  "tilesetid" : "test",
+  "rects": {
+    "simple-block" : {
+      "x": 0, "y": 0, "w": 32, "h": 24, "cx": 16, "cy": 8
+    },
+    "simple-ground" : {
+      "x": 32, "y": 8, "w": 32, "h": 16, "cx": 16, "cy": 8
+    },
+    "simple-building" : {
+      "x": 0, "y": 48, "w": 64, "h": 42, "cx": 16, "cy": 24
+    }
+  }
+}
