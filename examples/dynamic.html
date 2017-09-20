@@ -2,93 +2,98 @@
 <html>
 <head>
   <title>Performance Page</title>
+  <style type="text/css">
+    * {
+      padding: 0;
+      margin: 0;
+    }
+  </style>
 </head>
-<body>
+<body style="overflow:hidden">
   <canvas id='game-container'></canvas>
-  <div id='results' style='position: absolute; left: 0px; top: 60px'></div>
+  <div id='results' style='position: absolute; left:0px; top:60px;;'></div>
   <script src='../vendor/Stats.js'></script>
-  <script src='../lib/isometric.js'></script>
+  <script src='../isometric.js'></script>
   <script>
-
     // load the Stats to validate performance
     var stats = new Stats();
     stats.setMode(1); // 0: fps, 1: ms
-
     stats.domElement.style.position = 'absolute';
     stats.domElement.style.left = '0px';
     stats.domElement.style.top = '0px';
-
     document.body.appendChild( stats.domElement );
-
     // load the tileset
     var tileset = new Image();
     tileset.src = 'ground-test-half.png';
-
     // create one sprite
     var sprite = new thc.Sprite('sprite-ground',
       tileset,
       32, 16,   // size of this tile
       32, 8,    // top left position of the this tile in the tileset
       16, 8);   // center of this tile, if the tile is flat the values are half from the size of the tile
-
     var block = new thc.Sprite('sprite-block',
       tileset,
       32, 24,   // size of this tile
       0, 0,     // top left position of the this tile in the tileset
-      16, 8);   // center of this tile, if the tile is flat the values are half from the size of the tile
-
+      16, 16);   // center of this tile, if the tile is flat the values are half from the size of the tile
     // find the canvas
     var canvas = document.getElementById('game-container');
-
     // create the isometric renderer
     var isometric = new thc.Isometric(canvas,
       32, 16,     // normal size of the tiles
       600, 480);  // canvas size
-
     // let the isometric know about our sprite
     isometric.addSprite(sprite);
     isometric.addSprite(block);
-
     // create a camera to represent where is the center of the screen
-    var camera = {x: 0, y: 0};
+    var camera = {x: 10, y: 0};
     isometric.setCamera(camera);
-
     var counter = 0;
     var step = 0;
     var results = document.getElementById('results');
-
     function appendResult(ms, qtd) {
-      var p = document.createElement('p');
-      p.textContent = ms + 'ms to render ' + qtd + ' elements';
-      results.appendChild(p);
+      // clearing some space
+      //var p = document.createElement('p');
+      //p.textContent = ms + 'ms to render ' + qtd + ' elements';
+      //results.appendChild(p);
     }
-
-    setInterval(function () {
-
-      for (var i=0; i<10; i++) {
-        isometric.addObject({
-          x: (Math.random()*600-300)/8.0,
-          y: (Math.random()*480-240)/8.0,
+    var objs = [];
+    for (var i=-45; i<45; i++) {
+      for (var j=-30; j<30; j++) {
+        var o = {
+          x: i * 1,
+          y: j * 1,
           sizeX: 32,
           sizeY: 16,
-          sprite: Math.random()>0.5? 'sprite-ground' : 'sprite-block'});
+          sprite: Math.random()>0.5? 'sprite-ground' : 'sprite-block'
+        }
+        isometric.addObject(o);
+        objs.push(o);
       }
-
+    }
+    var len = objs.length;
+    var changes = Math.floor(len / 10.0);
+    var p = document.createElement('p');
+    p.textContent = 'Rendering ' + len + ' objects on the screen';
+    results.appendChild(p);
+    setInterval(function () {
+      for (var i=0; i<changes; i++) {
+        var rnd = Math.floor(Math.random()*len)
+        var o = objs[rnd];
+        if (o.sprite == 'sprite-ground') o.sprite = 'sprite-block';
+        else {o.sprite = 'sprite-ground'}
+      }
+ 
       isometric.orderObjects();
-
       if (counter++ % 10 == 0) {
         //console.log('number of objects ' + isometric.objects.length);
       }
-
       // start counting performance
       stats.begin();
-
       // draws everything
       isometric.draw();
-
       // end counting performance
       var t = stats.end();
-
       if (t > 4 && step == 0) {
         console.log('number of objects at ms > 4 ' + isometric.objects.length);
         appendResult(4, isometric.objects.length);
@@ -109,15 +114,42 @@
         appendResult(16, isometric.objects.length);
         step++;
       }
-
     }, 1000.0 / 60.0 );
-
     window.onresize = function() {
       var w = window.innerWidth;
       var h = window.innerHeight;
       isometric.resize(w, h);
     }
-
+    // http://stackoverflow.com/questions/7790725/javascript-track-mouse-position
+    document.onmousemove = handleMouseMove;
+    function handleMouseMove(event) {
+        var dot, eventDoc, doc, body, pageX, pageY;
+        event = event || window.event; // IE-ism
+        // If pageX/Y aren't available and clientX/Y are,
+        // calculate pageX/Y - logic taken from jQuery.
+        // (This is to support old IE)
+        if (event.pageX == null && event.clientX != null) {
+            eventDoc = (event.target && event.target.ownerDocument) || document;
+            doc = eventDoc.documentElement;
+            body = eventDoc.body;
+            event.pageX = event.clientX +
+              (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
+              (doc && doc.clientLeft || body && body.clientLeft || 0);
+            event.pageY = event.clientY +
+              (doc && doc.scrollTop  || body && body.scrollTop  || 0) -
+              (doc && doc.clientTop  || body && body.clientTop  || 0 );
+        }
+        // Use event.pageX / event.pageY here
+        var width = window.innerWidth;
+        var height = window.innerHeight;
+        var cam = isometric.getCamera();
+        var posx = event.pageX - (width / 2);
+        var posy = event.pageY - (height / 2);
+        var camx = posx / 2;
+        var camy = posy / 2;
+        cam.x = -camx;
+        cam.y = camy;
+    }
     var w = window.innerWidth;
     var h = window.innerHeight;
     isometric.resize(w, h);
